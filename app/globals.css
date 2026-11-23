@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+/* "Sinema stüdyosu" design tokens (spec §11). Components use the semantic names below
+   (bg-canvas, bg-panel, text-ink, border-line, bg-accent, …), never raw colours. */
+:root {
+  color-scheme: dark;
+
+  /* surfaces, darkest to lightest */
+  --topbar: #0b0b0b;
+  --canvas: #121212;
+  --panel: #171717;
+  --field: #1f1f1f;
+  --field-hover: #262626;
+  --line: #262626;
+  --line-strong: #333333;
+
+  /* text — muted is 5.2:1 on panel, 4.8:1 on field (AA); faint is decorative only */
+  --ink: #ece8e1;
+  --muted: #8a8a8a;
+  --faint: #5c5c5c;
+
+  /* the single accent, plus status colours used only where named */
+  --accent: #f0a43a;
+  --accent-hover: #f5b75c;
+  --on-accent: #121212;
+  --ok: #9fd9a8;
+  --danger: #ef6b5b;
+
+  /* overlays */
+  --scrim: rgb(0 0 0 / 0.84);
+  --dim: rgb(0 0 0 / 0.55);
+}
+
+@theme inline {
+  --color-topbar: var(--topbar);
+  --color-canvas: var(--canvas);
+  --color-panel: var(--panel);
+  --color-field: var(--field);
+  --color-field-hover: var(--field-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --color-scrim: var(--scrim);
+  --color-dim: var(--dim);
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
+}
+
+@theme {
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-chip: 999px;
+
+  /* type scale: display 28–36, section label 13, body 14, small 12 */
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.05;
+  --text-display-sm: 1.75rem;
+  --text-display-sm--line-height: 1.1;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.25rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.45rem;
+  --text-small: 0.75rem;
+  --text-small--line-height: 1.1rem;
+
+  /* motion: strong ease-out for UI feedback (150–250 ms) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html {
+  background: var(--canvas);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+/* phones: keep focused controls clear of the sticky top bar and ÜRET bar */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-top: 4.5rem;
+    scroll-padding-bottom: 8rem;
+  }
+}
+/* desktop: the app shell never rubber-bands */
+@media (pointer: fine) {
+  html {
+    overscroll-behavior: none;
+  }
+}
+
+button,
+a,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Windows dark mode renders native option lists with system colours otherwise */
+option {
+  background-color: var(--field);
+  color: var(--ink);
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 0.5rem;
+  z-index: 50;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible {
+  transform: none;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* in the base layer so a utility (e.g. an inset offset on clipped tiles) can adjust it */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- buttons ---------- */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0 0.875rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background-color 150ms var(--ease-out),
+      border-color 150ms var(--ease-out),
+      color 150ms var(--ease-out),
+      opacity 150ms var(--ease-out),
+      transform 120ms var(--ease-out);
+  }
+  .btn:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: scale(0.98);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .btn-ghost {
+    background: var(--field);
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+  .btn-quiet {
+    background: transparent;
+    color: var(--muted);
+  }
+  .btn-sm {
+    min-height: 2rem;
+    padding: 0 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--field-hover);
+      border-color: var(--faint);
+    }
+    .btn-quiet:hover:not(:disabled) {
+      background: var(--field);
+      color: var(--ink);
+    }
+  }
+
+  /* comfortable touch targets */
+  @media (pointer: coarse) {
+    .btn {
+      min-height: 2.75rem;
+    }
+  }
+
+  /* text fields and selects */
+  .field {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--line-strong);
+    background: var(--field);
+    color: var(--ink);
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    transition:
+      border-color 150ms var(--ease-out),
+      background-color 150ms var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--muted);
+  }
+  .field:focus-visible {
+    border-color: var(--accent);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .field:hover {
+      background: var(--field-hover);
+    }
+  }
+}
+
+/* ---------- surfaces ---------- */
+
+/* transparent-PNG backdrop, tuned for the dark canvas */
+.checkerboard {
+  background-color: var(--field);
+  background-image:
+    linear-gradient(45deg, var(--field-hover) 25%, transparent 25%, transparent 75%, var(--field-hover) 75%),
+    linear-gradient(45deg, var(--field-hover) 25%, transparent 25%, transparent 75%, var(--field-hover) 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    8px 8px;
+}
+
+/* viewfinder corner marks: the studio's frame for empty and pending images */
+.viewfinder {
+  --vf-size: 18px;
+  --vf-inset: 14px;
+  --vf-color: var(--line-strong);
+  background:
+    linear-gradient(var(--vf-color), var(--vf-color)) var(--vf-inset) var(--vf-inset) / var(--vf-size) 1px,
+    linear-gradient(var(--vf-color), var(--vf-color)) var(--vf-inset) var(--vf-inset) / 1px var(--vf-size),
+    linear-gradient(var(--vf-color), var(--vf-color)) calc(100% - var(--vf-inset)) var(--vf-inset) / var(--vf-size) 1px,
+    linear-gradient(var(--vf-color), var(--vf-color)) calc(100% - var(--vf-inset)) var(--vf-inset) / 1px var(--vf-size),
+    linear-gradient(var(--vf-color), var(--vf-color)) var(--vf-inset) calc(100% - var(--vf-inset)) / var(--vf-size) 1px,
+    linear-gradient(var(--vf-color), var(--vf-color)) var(--vf-inset) calc(100% - var(--vf-inset)) / 1px var(--vf-size),
+    linear-gradient(var(--vf-color), var(--vf-color)) calc(100% - var(--vf-inset)) calc(100% - var(--vf-inset)) / var(--vf-size) 1px,
+    linear-gradient(var(--vf-color), var(--vf-color)) calc(100% - var(--vf-inset)) calc(100% - var(--vf-inset)) / 1px var(--vf-size);
+  background-repeat: no-repeat;
+}
+
+/* calm loading sweep for pending result tiles; the element itself must be positioned */
+.shimmer {
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--ink) 5%, transparent) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: shimmer-sweep 2.4s ease-in-out infinite;
+}
+@keyframes shimmer-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+/* reduced motion: a still, faint wash instead of the looping sweep */
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    transform: none;
+    animation: none;
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
+}
+
+/* result grid: column count by number of images, each column capped so a whole
+   tile (at its own aspect ratio) fits on screen */
+.result-grid {
+  --cols: 2;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(var(--cols), minmax(0, var(--tile-max, 1fr)));
+}
+.result-grid[data-count="1"] {
+  --cols: 1;
+}
+@media (min-width: 1024px) {
+  .result-grid {
+    gap: 1rem;
+  }
+  .result-grid[data-count="3"] {
+    --cols: 3;
+  }
+}
+@media (min-width: 1280px) {
+  .result-grid[data-count="4"] {
+    --cols: 4;
+  }
+}
+
+/* quiet scrollbars in scroll panes */
+.scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* native <details> without the default marker */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* toasts slide in from the top edge */
+.toast {
+  transition:
+    opacity 250ms var(--ease-out),
+    transform 250ms var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* lightbox fade */
+.lightbox[open] {
+  animation: lightbox-in 200ms var(--ease-out);
+}
+.lightbox[open]::backdrop {
+  background: var(--scrim);
+  animation: lightbox-fade 200ms var(--ease-out);
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+@keyframes lightbox-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* reduced motion keeps colour/opacity feedback, drops movement */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+  .toast {
+    @starting-style {
+      transform: none;
+    }
+  }
+  .lightbox[open] {
+    animation-name: lightbox-fade;
+  }
+}

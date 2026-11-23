@@ -1,0 +1,5 @@
+# Exact bytes matter: cmd.exe needs CRLF, PowerShell 5.1 needs the BOM, bash needs LF.
+*.bat -text
+*.ps1 -text
+*.command text eol=lf
+*.sh text eol=lf
